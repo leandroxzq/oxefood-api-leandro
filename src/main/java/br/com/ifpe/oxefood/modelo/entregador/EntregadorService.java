@@ -14,11 +14,14 @@ public class EntregadorService {
    private EntregadorRepository repository;
 
    @Transactional
-   public Entregador save(Entregador entregador) {
+    public Entregador save(Entregador entregador) {
 
        entregador.setHabilitado(Boolean.TRUE);
+       if (entregador.getAtivo() == null) {
+           entregador.setAtivo(Boolean.TRUE);
+       }
        return repository.save(entregador);
-   }
+    }
 
    public List<Entregador> listarTodos() {
 
@@ -29,4 +32,43 @@ public class EntregadorService {
 
         return repository.findById(id).get();
     }
+
+    
+    @Transactional
+    public void update(Long id, Entregador entregadorAlterado) {
+
+        Entregador entregador = repository.findById(id).get();
+        entregador.setNome(entregadorAlterado.getNome());
+        entregador.setDataNascimento(entregadorAlterado.getDataNascimento());
+        entregador.setCpf(entregadorAlterado.getCpf());
+        entregador.setRg(entregadorAlterado.getRg());
+        entregador.setFoneCelular(entregadorAlterado.getFoneCelular());
+        entregador.setFoneFixo(entregadorAlterado.getFoneFixo());
+        entregador.setQtdEntregasRealizadas(
+            entregadorAlterado.getQtdEntregasRealizadas()
+        );
+        entregador.setValorFrete(entregadorAlterado.getValorFrete());
+        entregador.setEnderecoRua(entregadorAlterado.getEnderecoRua());
+        entregador.setEnderecoComplemento(
+            entregadorAlterado.getEnderecoComplemento()
+        );
+        entregador.setEnderecoNumero(entregadorAlterado.getEnderecoNumero());
+        entregador.setEnderecoBairro(entregadorAlterado.getEnderecoBairro());
+        entregador.setEnderecoCidade(entregadorAlterado.getEnderecoCidade());
+        entregador.setEnderecoCep(entregadorAlterado.getEnderecoCep());
+        entregador.setEnderecoUf(entregadorAlterado.getEnderecoUf());
+        entregador.setAtivo(entregadorAlterado.getAtivo());
+
+        repository.save(entregador);
+    }
+
+    @Transactional
+    public void delete(Long id) {
+
+        Entregador entregador = repository.findById(id).get();
+        entregador.setHabilitado(Boolean.FALSE);
+
+        repository.save(entregador);
+    }
+
 }
