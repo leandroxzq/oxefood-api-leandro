@@ -13,12 +13,16 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.ifpe.oxefood.modelo.acesso.UsuarioService;
 import br.com.ifpe.oxefood.modelo.cliente.Cliente;
 import br.com.ifpe.oxefood.modelo.cliente.ClienteService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/cliente")
@@ -31,20 +35,24 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 
 public class ClienteController {
 
-   @Autowired
-   private ClienteService clienteService;
+    @Autowired
+    private ClienteService clienteService;
 
-   @Operation(
-       summary = "Serviço responsável por salvar um cliente no sistema.",
-       description = "Exemplo de descrição de um endpoint responsável por inserir um cliente no sistema."
-   )
+    @Autowired
+    private UsuarioService usuarioService;
 
-   @PostMapping
-   public ResponseEntity<Cliente> save(@RequestBody ClienteRequest request) {
+    @Operation(
+        summary = "Serviço responsável por salvar um cliente no sistema.",
+        description = "Exemplo de descrição de um endpoint responsável por inserir um cliente no sistema."
+    )
 
-       Cliente cliente = clienteService.save(request.build());
-       return new ResponseEntity<Cliente>(cliente, HttpStatus.CREATED);
-   }
+    @PostMapping
+    public ResponseEntity<Cliente> save(@RequestBody @Valid ClienteRequest clienteRequest, HttpServletRequest request) {
+
+        Cliente cliente = clienteService.save(clienteRequest.build(), usuarioService.obterUsuarioLogado(request));
+        return new ResponseEntity<Cliente>(cliente, HttpStatus.CREATED);
+    }
+
 
    @GetMapping
     public List<Cliente> listarTodos() {
@@ -57,17 +65,26 @@ public class ClienteController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Cliente> update(@PathVariable("id") Long id, @RequestBody ClienteRequest request) {
+    public ResponseEntity<Cliente> update(@PathVariable("id") Long id, @RequestBody ClienteRequest clienteRequest, HttpServletRequest request) {
 
-        clienteService.update(id, request.build());
-        return ResponseEntity.ok().build();
+	    clienteService.update(id, clienteRequest.build(), usuarioService.obterUsuarioLogado(request));
+	    return ResponseEntity.ok().build();
     }
+
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> delete(@PathVariable Long id) {
 
         clienteService.delete(id);
         return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/filtrar")
+    public List<Cliente> filtrar(
+        @RequestParam(value = "nome", required = false) String nome,
+        @RequestParam(value = "cpf", required = false) String cpf) {
+
+        return clienteService.filtrar(nome, cpf);
     }
 
 }

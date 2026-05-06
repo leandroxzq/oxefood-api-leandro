@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 
 import br.com.ifpe.oxefood.modelo.acesso.Perfil;
 import br.com.ifpe.oxefood.modelo.acesso.PerfilRepository;
+import br.com.ifpe.oxefood.modelo.acesso.Usuario;
 import br.com.ifpe.oxefood.modelo.acesso.UsuarioService;
 import jakarta.transaction.Transactional;
 
@@ -23,7 +24,7 @@ public class ClienteService {
    private PerfilRepository perfilUsuarioRepository;
 
    @Transactional
-   public Cliente save(Cliente cliente) {
+   public Cliente save(Cliente cliente, Usuario usuarioLogado) {
 
        usuarioService.save(cliente.getUsuario());
 
@@ -33,8 +34,8 @@ public class ClienteService {
        }
 
        cliente.setHabilitado(Boolean.TRUE);
-       Cliente clienteSalvo = repository.save(cliente);
-       return clienteSalvo;
+       cliente.setCriadoPor(usuarioLogado);
+       return repository.save(cliente);
    }
 
    public List<Cliente> listarTodos() {
@@ -48,7 +49,7 @@ public class ClienteService {
     }
 
     @Transactional
-    public void update(Long id, Cliente clienteAlterado) {
+    public void update(Long id, Cliente clienteAlterado, Usuario usuarioLogado) {
 
         Cliente cliente = repository.findById(id).get();
         cliente.setNome(clienteAlterado.getNome());
@@ -56,6 +57,8 @@ public class ClienteService {
         cliente.setCpf(clienteAlterado.getCpf());
         cliente.setFoneCelular(clienteAlterado.getFoneCelular());
         cliente.setFoneFixo(clienteAlterado.getFoneFixo());
+
+        cliente.setUltimaModificacaoPor(usuarioLogado);
         
         repository.save(cliente);
     }
@@ -67,5 +70,34 @@ public class ClienteService {
         cliente.setHabilitado(Boolean.FALSE);
 
         repository.save(cliente);
+    }
+
+    public List<Cliente> filtrar(String nome, String cpf) {
+
+        nome = normalizarParametro(nome);
+        cpf = normalizarParametro(cpf);
+
+        if (nome != null && cpf != null) {
+            return repository.findByNomeContainingIgnoreCaseAndCpfContainingOrderByNomeAsc(nome, cpf);
+        }
+
+        if (nome != null) {
+            return repository.findByNomeContainingIgnoreCaseOrderByNomeAsc(nome);
+        }
+
+        if (cpf != null) {
+            return repository.findByCpfContainingOrderByNomeAsc(cpf);
+        }
+
+        return repository.findAll();
+    }
+
+    private String normalizarParametro(String parametro) {
+
+        if (parametro == null || parametro.trim().isEmpty()) {
+            return null;
+        }
+
+        return parametro.trim();
     }
 }

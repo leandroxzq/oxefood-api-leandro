@@ -1,7 +1,15 @@
 package br.com.ifpe.oxefood.modelo.cliente;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface ClienteRepository extends JpaRepository<Cliente, Long> {
-    
+
+    List<Cliente> findByNomeContainingIgnoreCaseOrderByNomeAsc(String nome);
+
+    List<Cliente> findByCpfContainingOrderByNomeAsc(String cpf);
+
+    List<Cliente> findByNomeContainingIgnoreCaseAndCpfContainingOrderByNomeAsc(String nome, String cpf);
+
 }

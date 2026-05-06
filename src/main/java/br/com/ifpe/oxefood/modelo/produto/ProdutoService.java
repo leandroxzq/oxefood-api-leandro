@@ -40,6 +40,7 @@ public class ProdutoService {
         produto.setValorUnitario(produtoAlterado.getValorUnitario());
         produto.setTempoEntregaMinimo(produtoAlterado.getTempoEntregaMinimo());
         produto.setTempoEntregaMaximo(produtoAlterado.getTempoEntregaMaximo());
+        produto.setCategoria(produtoAlterado.getCategoria());
         
         repository.save(produto);
     }
@@ -52,4 +53,22 @@ public class ProdutoService {
 
         repository.save(produto);
     }
+
+    public List<Produto> filtrar(String codigo, String titulo, Long idCategoria) {
+
+        codigo = normalizarParametro(codigo);
+        titulo = normalizarParametro(titulo);
+
+        return repository.filtrar(codigo, titulo, idCategoria);
+    }
+
+    private String normalizarParametro(String parametro) {
+
+        if (parametro == null || parametro.trim().isEmpty()) {
+            return null;
+        }
+
+        return parametro.trim();
+    }
+
 }
