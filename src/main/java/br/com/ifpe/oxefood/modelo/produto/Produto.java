@@ -46,4 +46,8 @@ public class Produto extends EntidadeAuditavel {
    @ManyToOne
    @JoinColumn
    private Categoria categoria;
+
+   @Column
+   private String imagem;
+
 }
